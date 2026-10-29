@@ -26,9 +26,15 @@ cask "mylocal" do
   # 앱과 늘 같은 버전이다
   binary "#{appdir}/MyLocal.app/Contents/MacOS/mylocal"
 
-  # 앱이 SMAppService로 등록한 데몬(io.myiam.mylocal.daemon)을 내린다
-  uninstall launchctl: "io.myiam.mylocal.daemon",
-            quit:      "io.myiam.mylocal"
+  # 데몬(io.myiam.mylocal.daemon)과 로그인 항목은 앱이 SMAppService로 직접 해제한다.
+  # 사용자 권한이라 관리자 암호를 묻지 않고, 로그인 항목 기록도 바로 지워진다
+  # (launchctl remove는 작업만 내리고 기록은 남긴다). 그 뒤 앱을 종료한다
+  uninstall early_script: {
+              executable:   "#{appdir}/MyLocal.app/Contents/MacOS/mylocal-app",
+              args:         ["--unregister-daemon"],
+              must_succeed: false,
+            },
+            quit:         "io.myiam.mylocal"
 
   # 앱의 "MyLocal 제거…"에서 설정·활동 로그까지 지울 때와 같은 범위다
   zap trash: [

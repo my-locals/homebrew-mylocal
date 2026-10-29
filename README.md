@@ -39,6 +39,8 @@ brew uninstall --cask mylocal         # the app, the CLI link and the background
 brew uninstall --cask --zap mylocal   # also settings, activity log, logs and caches
 ```
 
+If you deleted MyLocal.app yourself first, add `--force`.
+
 ## Troubleshooting
 
 If you see a message that the tap is not trusted, trust it again:
