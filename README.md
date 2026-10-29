@@ -8,6 +8,7 @@ This repository also hosts the release files (GitHub Releases).
 
 ```bash
 brew tap my-locals/mylocal
+brew trust --tap my-locals/mylocal
 ```
 
 ## Install
@@ -38,6 +39,14 @@ brew uninstall --cask mylocal         # the app, the CLI link and the background
 brew uninstall --cask --zap mylocal   # also settings, activity log, logs and caches
 ```
 
+## Troubleshooting
+
+If you see a message that the tap is not trusted, trust it again:
+
+```bash
+brew trust --tap my-locals/mylocal
+```
+
 ## AI agents
 
 The [`mylocal-plugin`](https://github.com/my-locals/mylocal-plugin) skill lets Claude Code, Codex CLI and Antigravity CLI read MyLocal's activity log and diagnostics and change its schedule and rules with `mylocal`.
@@ -47,6 +56,7 @@ The [`mylocal-plugin`](https://github.com/my-locals/mylocal-plugin) skill lets C
 ```bash
 # 처음 한 번
 brew tap my-locals/mylocal
+brew trust --tap my-locals/mylocal
 
 # 설치 (앱과 명령줄 도구 mylocal)
 brew install --cask mylocal
@@ -58,6 +68,7 @@ brew upgrade --cask --greedy mylocal
 brew uninstall --cask mylocal
 ```
 
+"untrusted tap" 메시지가 나오면 `brew trust --tap my-locals/mylocal`를 실행합니다.
 앱과 앱 안에 든 `mylocal` 명령줄 도구가 함께 설치되고 버전도 늘 같습니다. Apple silicon, macOS 13 이상만 지원합니다.
 처음 한 번 MyLocal을 열고 백그라운드 실행을 허용하면 정리 데몬이 사용자 권한으로 돕니다. 관리자 암호는 필요 없습니다.
 
