@@ -27,8 +27,9 @@ cask "mylocal" do
   binary "#{appdir}/MyLocal.app/Contents/MacOS/mylocal"
 
   # 데몬(io.myiam.mylocal.daemon)과 로그인 항목은 앱이 SMAppService로 직접 해제한다.
-  # 사용자 권한이라 관리자 암호를 묻지 않고, 로그인 항목 기록도 바로 지워진다
-  # (launchctl remove는 작업만 내리고 기록은 남긴다). 그 뒤 앱을 종료한다
+  # 사용자 권한이라 관리자 암호를 묻지 않고, 로그인 항목에서 꺼짐으로 바뀐다(launchctl remove는
+  # 작업만 내리고 켜짐으로 남겨, 다시 설치하면 데몬이 뜨지 않을 수 있다). 꺼진 기록은 공개 API로
+  # 지울 수 없어 macOS가 정리할 때까지 목록에 남는다. 그 뒤 앱을 종료한다
   uninstall early_script: {
               executable:   "#{appdir}/MyLocal.app/Contents/MacOS/mylocal-app",
               args:         ["--unregister-daemon"],

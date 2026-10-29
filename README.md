@@ -41,6 +41,8 @@ brew uninstall --cask --zap mylocal   # also settings, activity log, logs and ca
 
 If you deleted MyLocal.app yourself first, add `--force`.
 
+System Settings > General > Login Items & Extensions may still list MyLocal, turned off: the daemon is unregistered and nothing runs, but macOS offers no public way to remove the entry, so it stays until macOS cleans it up. Installing again reuses it.
+
 ## Troubleshooting
 
 If you see a message that the tap is not trusted, trust it again:
@@ -70,6 +72,7 @@ brew upgrade --cask --greedy mylocal
 brew uninstall --cask mylocal
 ```
 
+제거한 뒤에도 시스템 설정 > 로그인 항목 및 확장 프로그램에 꺼진 MyLocal이 남을 수 있습니다. 아무것도 실행되지 않으며 macOS가 정리할 때까지 보입니다.
 "untrusted tap" 메시지가 나오면 `brew trust --tap my-locals/mylocal`를 실행합니다.
 앱과 앱 안에 든 `mylocal` 명령줄 도구가 함께 설치되고 버전도 늘 같습니다. Apple silicon, macOS 13 이상만 지원합니다.
 처음 한 번 MyLocal을 열고 백그라운드 실행을 허용하면 정리 데몬이 사용자 권한으로 돕니다. 관리자 암호는 필요 없습니다.
