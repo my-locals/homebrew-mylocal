@@ -1,0 +1,81 @@
+# 앱 Release를 게시하면 cask mylocal의 version·sha256을 Release 파일로 고친다.
+#   app-v<버전> → Casks/mylocal.rb (MyLocal.dmg, 앱 안 명령줄 도구도 함께 연결)
+# 릴리스 스크립트(비공개 저장소 mylocal-app의 scripts/release-macos.sh)는 초안 Release만 만들고,
+# 사람이 확인한 뒤 게시하면 이 워크플로가 이어 받는다. 다시 돌릴 때는 Actions에서 태그를 넣어 직접 실행
+name: Update casks
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release 태그 (예: app-v0.3.1)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-casks
+  cancel-in-progress: false
+
+jobs:
+  update:
+    # 시험판은 cask에 올리지 않는다
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    steps:
+      # release 이벤트는 태그 커밋을 체크아웃하므로 기본 브랜치를 직접 고른다
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Release 파일로 cask 고치기
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$TAG" =~ ^app-v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::태그 형식이 app-vX.Y.Z가 아닙니다"
+            exit 1
+          fi
+          cask=mylocal
+          asset=MyLocal.dmg
+          version="${BASH_REMATCH[1]}"
+          dir="$RUNNER_TEMP/assets"
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir "$dir" --pattern "$asset"
+          sha=$(sha256sum "$dir/$asset" | cut -d' ' -f1)
+
+          sed -i -E \
+            -e "s/^  version \"[^\"]*\"$/  version \"$version\"/" \
+            -e "s/^  sha256 \"[0-9a-f]{64}\"$/  sha256 \"$sha\"/" \
+            "Casks/$cask.rb"
+          grep -q "^  version \"$version\"$" "Casks/$cask.rb"
+          grep -q "^  sha256 \"$sha\"$" "Casks/$cask.rb"
+
+          if git diff --quiet; then
+            echo "바뀐 것이 없습니다"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "$cask $version"
+          git push
+
+      # 앱의 업데이트 피드(releases/latest/download/latest.json)와 README의 DMG 링크가 "최신" Release를
+      # 따르므로, 최신 표시는 늘 가장 새 앱 Release에 둔다
+      - name: 최신 표시를 앱 Release로
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # 목록은 만든 시각 역순. 초안·시험판을 빼고 가장 새 앱 Release
+          id=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '[.[] | select(.draft | not) | select(.prerelease | not) | select(.tag_name | test("^app-v"))][0].id // empty')
+          if [[ -z "$id" ]]; then
+            echo "게시된 앱 Release가 아직 없습니다"
+            exit 0
+          fi
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$id" -f make_latest=true >/dev/null
