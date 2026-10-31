@@ -1,8 +1,8 @@
 # version·sha256은 Release를 게시하면 .github/workflows/update-casks.yml이 고친다.
 # 첫 Release를 게시하기 전의 sha256은 자리 표시용이다
 cask "mylocal" do
-  version "0.4.9"
-  sha256 "4e1048045bb76a3c492863d0cb2cb0035f5208894044806041d2cf588f895f29"
+  version "0.5.0"
+  sha256 "8d9aad5dfc5a14a0788b8584dfecc39d6a775ecba58899f0fa82313b833cbd99"
 
   url "https://github.com/my-locals/homebrew-mylocal/releases/download/app-v#{version}/MyLocal.dmg"
   name "MyLocal"
